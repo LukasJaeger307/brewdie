@@ -28,8 +28,9 @@ class Rest:
         self.minutes = minutes
 
 class Recipe:
-    def __init__(self, name, style):
+    def __init__(self, name, style, boiling_minutes=60, malts = {}, rests=[], hop_dosages=[]):
         self.name = name
         self.style = style
-
-
+        self.malts = malts
+        self.boiling_minutes = boiling_minutes
+        self.hop_dosages = hop_dosages
