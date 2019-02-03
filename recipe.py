@@ -31,12 +31,19 @@ class Recipe:
     def __init__(self, name, style, boiling_minutes=60, malts = {}, rests=[], hop_dosages=[]):
         self.name = name
         self.style = style
+        self.rests = rests
         self.malts = malts
         self.boiling_minutes = boiling_minutes
         self.hop_dosages = hop_dosages
 
-    def addMalt(self, name, gramms):
+    def add_malt(self, name, gramms):
         self.malts[name] = gramms
 
-    def removeMalt(self, name):
+    def remove_malt(self, name):
         del(self.malts[name])
+
+    def add_rest(self, name, degrees, minutes):
+        self.rests.append(Rest(name, degrees, minutes))
+
+    def add_hop_dosage(self, name, gramms, minutes):
+        self.hop_dosages.append(HopDosage(name, gramms, minutes))
