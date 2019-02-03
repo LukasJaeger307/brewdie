@@ -20,7 +20,6 @@ import sys
 
 class BrewdieDB:
     def __init__(self):
-        print("Gnirf")
         try:
             # Establishing a connection
             connection = sqlite3.connect('brewdie.db')
@@ -37,16 +36,16 @@ class BrewdieDB:
             if not 'Malts' in table_names:
                 cursor.execute('CREATE TABLE Malts (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, gramms REAL, recipe_name TEXT)')
             if not 'Rests' in table_names:
-                cursor.execute('CREATE TABLE Rests (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, temperature REAL, minutes INTEGER, index INTEGER, recipe_name TEXT)')
+                cursor.execute('CREATE TABLE Rests (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, temperature REAL, minutes INTEGER, position INTEGER, recipe_name TEXT)')
             if not 'HopDosages' in table_names:
                 cursor.execute('CREATE TABLE HopDosages (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, minute INTEGER, gramms REAL, recipe_name TEXT)')
 
             connection.commit()
         
-        #except sqlite3.Error, e:
-        #    if connection:
-        #        connection.rollback()
-        #        sys.exit(1)
+        except sqlite3.Error as e:
+            if connection:
+                connection.rollback()
+                sys.exit(1)
 
         finally:
             if connection:
