@@ -34,3 +34,9 @@ class Recipe:
         self.malts = malts
         self.boiling_minutes = boiling_minutes
         self.hop_dosages = hop_dosages
+
+    def addMalt(self, name, gramms):
+        self.malts[name] = gramms
+
+    def removeMalt(self, name):
+        del(self.malts[name])
