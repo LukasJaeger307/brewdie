@@ -17,10 +17,23 @@
 # You should have received a copy of the GNU General Public License
 # along with Brewdie.  If not, see <http://www.gnu.org/licenses/>. 
 
+from recipe import *
 from brewdiedb import *
 
 VERSION = "0.1"
-
 print("Brewdie v" + VERSION)
 
 db = BrewdieDB()
+
+recipe = Recipe("South Star", "Pale Ale", 70)
+recipe.add_malt("Pale Ale Malz", 4700)
+recipe.add_malt("Carapils", 235)
+
+recipe.add_rest("Hauptrast", 65, 60)
+
+recipe.add_hop_dosage("Cascade", 41, 0)
+recipe.add_hop_dosage("Cascade", 20, 15)
+recipe.add_hop_dosage("Cascade", 20, 65)
+recipe.add_hop_dosage("Cascade", 63, 70)
+
+db.store_recipe(recipe)

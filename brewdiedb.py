@@ -17,6 +17,7 @@
 
 import sqlite3
 import sys
+from recipe import *
 
 class BrewdieDB:
     def __init__(self):
@@ -36,9 +37,9 @@ class BrewdieDB:
             if not 'Malts' in table_names:
                 cursor.execute('CREATE TABLE Malts (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, gramms REAL, recipe_name TEXT)')
             if not 'Rests' in table_names:
-                cursor.execute('CREATE TABLE Rests (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, temperature REAL, minutes INTEGER, position INTEGER, recipe_name TEXT)')
+                cursor.execute('CREATE TABLE Rests (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, degrees REAL, minutes INTEGER, position INTEGER, recipe_name TEXT)')
             if not 'HopDosages' in table_names:
-                cursor.execute('CREATE TABLE HopDosages (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, minute INTEGER, gramms REAL, recipe_name TEXT)')
+                cursor.execute('CREATE TABLE HopDosages (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, minutes INTEGER, gramms REAL, recipe_name TEXT)')
 
             connection.commit()
         
@@ -50,3 +51,41 @@ class BrewdieDB:
         finally:
             if connection:
                 connection.close()
+
+    def store_recipe(self, recipe):
+        try:
+            # Establishing a connection
+            connection = sqlite3.connect('brewdie.db')
+            cursor = connection.cursor()
+        
+            # Querying, whether or not the recipe is already in the database
+            recipe_names = []
+            for row in cursor.execute('SELECT name FROM Recipes'):
+                recipe_names.append(row[0])
+            if recipe.name in recipe_names:
+                print("Recipe is already stored in the database")
+            else:
+                # It is not, so we can insert it
+                cursor.execute('INSERT INTO Recipes VALUES(?, ?, ?)', (recipe.name, recipe.style, recipe.boiling_minutes))
+                for (malt_name, malt_gramms) in recipe.malts.items():
+                    cursor.execute('INSERT INTO Malts(name, gramms, recipe_name) VALUES(?, ?, ?)', (malt_name, malt_gramms, recipe.name))
+
+                index = 0
+                for rest in recipe.rests:
+                    cursor.execute('INSERT INTO Rests(name, degrees, minutes, position, recipe_name) VALUES(?, ?, ?, ?, ?)', (rest.name, rest.degrees, rest.minutes, index, recipe.name))
+                    index = index + 1
+
+                for hop_dosage in recipe.hop_dosages:
+                    cursor.execute('INSERT INTO HopDosages(name, minutes, gramms, recipe_name) VALUES(?, ?, ?, ?)', (hop_dosage.name, hop_dosage.minutes, hop_dosage.gramms, recipe.name))
+            connection.commit()
+        except sqlite3.Error as e:
+            print("Something went wrong")
+            print(e)
+            if connection:
+                connection.rollback()
+            return
+
+        finally:
+            if connection:
+                connection.close()
+
