@@ -89,3 +89,41 @@ class BrewdieDB:
             if connection:
                 connection.close()
 
+    def load_recipes(self):
+        recipes = []
+        try:
+            # Establishing a connection
+            connection = sqlite3.connect('brewdie.db')
+            cursor = connection.cursor()
+        
+            # Getting all the recipes
+            for row in cursor.execute('SELECT * FROM Recipes'):
+                # Converting a recipe database row into a python object
+                recipe = Recipe(row[0], row[1], row[2])
+
+                # Adding the malts
+                for malt_row in cursor.execute('SELECT * FROM Malts WHERE recipe_name=\'%s\'' % recipe.name):
+                    recipe.malts[malt_row[1]] = malt_row[2]
+
+                # Adding the rests
+                for rest_row in cursor.execute('SELECT * FROM Rests WHERE recipe_name=\'%s\' ORDER BY position ASC' % recipe.name):
+                    recipe.rests.append(Rest(rest_row[1], rest_row[2], rest_row[3]))
+
+                # Adding the hop dosages
+                for hop_dosage_row in cursor.execute('SELECT * FROM HopDosages WHERE recipe_name=\'%s\'' % recipe.name):
+                    recipe.hop_dosages.append(HopDosage(hop_dosage_row[1], hop_dosage_row[3], hop_dosage_row[2]))
+
+                # Adding the recipe to the list of recipes
+                recipes.append(recipe)
+
+        except sqlite3.Error as e:
+            print("Something went wrong")
+            print(e)
+            if connection:
+                connection.rollback()
+            return
+
+        finally:
+            if connection:
+                connection.close()
+        return recipes
