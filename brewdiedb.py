@@ -100,17 +100,18 @@ class BrewdieDB:
             for row in cursor.execute('SELECT * FROM Recipes'):
                 # Converting a recipe database row into a python object
                 recipe = Recipe(row[0], row[1], row[2])
+                recipe_name = (recipe.name, )
 
                 # Adding the malts
-                for malt_row in cursor.execute('SELECT * FROM Malts WHERE recipe_name=\'%s\'' % recipe.name):
+                for malt_row in cursor.execute('SELECT * FROM Malts WHERE recipe_name=?', recipe_name):
                     recipe.malts[malt_row[1]] = malt_row[2]
 
                 # Adding the rests
-                for rest_row in cursor.execute('SELECT * FROM Rests WHERE recipe_name=\'%s\' ORDER BY position ASC' % recipe.name):
+                for rest_row in cursor.execute('SELECT * FROM Rests WHERE recipe_name=? ORDER BY position ASC', recipe_name):
                     recipe.rests.append(Rest(rest_row[1], rest_row[2], rest_row[3]))
 
                 # Adding the hop dosages
-                for hop_dosage_row in cursor.execute('SELECT * FROM HopDosages WHERE recipe_name=\'%s\'' % recipe.name):
+                for hop_dosage_row in cursor.execute('SELECT * FROM HopDosages WHERE recipe_name=?', recipe_name):
                     recipe.hop_dosages.append(HopDosage(hop_dosage_row[1], hop_dosage_row[3], hop_dosage_row[2]))
 
                 # Adding the recipe to the list of recipes
