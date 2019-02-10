@@ -135,6 +135,34 @@ class BrewdieDB:
             if connection:
                 connection.close()
         return recipe
+
+    
+    def delete_recipe(self, name):
+        try:
+            # Establishing a connection
+            connection = sqlite3.connect('brewdie.db')
+            cursor = connection.cursor()
+        
+            # Deleting the recipe
+            db_name = (name,)
+            cursor.execute('DELETE FROM Recipes WHERE name=?', db_name)
+
+            # Deleting malts, rests and hop dosages that were contained in the recipe
+            cursor.execute('DELETE FROM Malts WHERE recipe_name=?', db_name)
+            cursor.execute('DELETE FROM Rests WHERE recipe_name=?', db_name)
+            cursor.execute('DELETE FROM HopDosages WHERE recipe_name=?', db_name)
+            
+            connection.commit()
+        except sqlite3.Error as e:
+            print("Something went wrong")
+            print(e)
+            if connection:
+                connection.rollback()
+            return
+
+        finally:
+            if connection:
+                connection.close()
     
     
     def load_recipes(self):
