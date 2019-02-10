@@ -89,6 +89,25 @@ class BrewdieDB:
             if connection:
                 connection.close()
 
+    def row_to_recipe(self, row, cursor):
+        # Converting a recipe database row into a python object
+        recipe = Recipe(row[0], row[1], row[2])
+        recipe_name = (recipe.name, )
+
+        # Adding the malts
+        for malt_row in cursor.execute('SELECT * FROM Malts WHERE recipe_name=?', recipe_name):
+            recipe.malts[malt_row[1]] = malt_row[2]
+
+        # Adding the rests
+        for rest_row in cursor.execute('SELECT * FROM Rests WHERE recipe_name=? ORDER BY position ASC', recipe_name):
+            recipe.rests.append(Rest(rest_row[1], rest_row[2], rest_row[3]))
+
+        # Adding the hop dosages
+        for hop_dosage_row in cursor.execute('SELECT * FROM HopDosages WHERE recipe_name=?', recipe_name):
+            recipe.hop_dosages.append(HopDosage(hop_dosage_row[1], hop_dosage_row[3], hop_dosage_row[2]))
+        
+        return recipe
+
     def load_recipe(self, name):
         try:
             # Establishing a connection
@@ -100,25 +119,10 @@ class BrewdieDB:
             cursor.execute('SELECT * FROM Recipes WHERE name=?', db_name)
             row = cursor.fetchone()
             if (row):    
-                # Converting a recipe database row into a python object
-                recipe = Recipe(row[0], row[1], row[2])
-                recipe_name = (recipe.name, )
-
-                # Adding the malts
-                for malt_row in cursor.execute('SELECT * FROM Malts WHERE recipe_name=?', recipe_name):
-                    recipe.malts[malt_row[1]] = malt_row[2]
-
-                # Adding the rests
-                for rest_row in cursor.execute('SELECT * FROM Rests WHERE recipe_name=? ORDER BY position ASC', recipe_name):
-                    recipe.rests.append(Rest(rest_row[1], rest_row[2], rest_row[3]))
-
-                # Adding the hop dosages
-                for hop_dosage_row in cursor.execute('SELECT * FROM HopDosages WHERE recipe_name=?', recipe_name):
-                    recipe.hop_dosages.append(HopDosage(hop_dosage_row[1], hop_dosage_row[3], hop_dosage_row[2]))
-
+                recipe = self.row_to_recipe (row, cursor)
             else:
                 print("Could not find recipe: " + name)
-                return None
+                recipe = None
 
         except sqlite3.Error as e:
             print("Something went wrong")
@@ -142,24 +146,7 @@ class BrewdieDB:
         
             # Getting all the recipes
             for row in cursor.execute('SELECT * FROM Recipes'):
-                # Converting a recipe database row into a python object
-                recipe = Recipe(row[0], row[1], row[2])
-                recipe_name = (recipe.name, )
-
-                # Adding the malts
-                for malt_row in cursor.execute('SELECT * FROM Malts WHERE recipe_name=?', recipe_name):
-                    recipe.malts[malt_row[1]] = malt_row[2]
-
-                # Adding the rests
-                for rest_row in cursor.execute('SELECT * FROM Rests WHERE recipe_name=? ORDER BY position ASC', recipe_name):
-                    recipe.rests.append(Rest(rest_row[1], rest_row[2], rest_row[3]))
-
-                # Adding the hop dosages
-                for hop_dosage_row in cursor.execute('SELECT * FROM HopDosages WHERE recipe_name=?', recipe_name):
-                    recipe.hop_dosages.append(HopDosage(hop_dosage_row[1], hop_dosage_row[3], hop_dosage_row[2]))
-
-                # Adding the recipe to the list of recipes
-                recipes.append(recipe)
+                recipes.append(self.row_to_recipe(row, cursor))
 
         except sqlite3.Error as e:
             print("Something went wrong")
