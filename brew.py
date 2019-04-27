@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 # Copyright 2019, Lukas Jäger 
 #
 # This file is part of Brewdie.
@@ -18,32 +16,19 @@
 # along with Brewdie.  If not, see <http://www.gnu.org/licenses/>. 
 
 import datetime
-
 from recipe import *
-from brew import *
-from brewdiedb import *
 
-VERSION = "0.1"
-print("Brewdie v" + VERSION)
+class Brew:
+    def __init__ (self, datetime, recipe, note):
+        self.datetime = datetime
+        self.recipe = recipe
+        self.note = note
+        self.density_initial = 0
+        self.density_final = 0
 
-db = BrewdieDB()
+    def get_weight_percentage(self):
+        return (self.density_initial - self.density_final) * 105
 
-recipe = Recipe("South Star", "Pale Ale", 70)
-recipe.add_malt("Pale Ale Malz", 4700)
-recipe.add_malt("Carapils", 235)
+    def get_volume_percentage(self):
+        return self.get_weight_percentage() * 1.25
 
-recipe.add_rest("Hauptrast", 65, 60)
-
-recipe.add_hop_dosage("Cascade", 41, 0)
-recipe.add_hop_dosage("Cascade", 20, 15)
-recipe.add_hop_dosage("Cascade", 20, 65)
-recipe.add_hop_dosage("Cascade", 63, 70)
-
-db.store_recipe(recipe)
-
-# Creating a brew
-brew = Brew(datetime.datetime.now(), recipe, "Gnampf")
-brew.density_initial = 1.050
-brew.density_final = 1.012
-
-print(brew.get_volume_percentage())
