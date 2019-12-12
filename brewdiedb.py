@@ -289,3 +289,31 @@ class BrewdieDB:
                 connection.close()
 
         return recipes
+    
+    def load_recipes_by_name(self, name):
+        recipes = []
+        try:
+            # Establishing a connection
+            connection = sqlite3.connect('brewdie.db')
+            cursor = connection.cursor()
+        
+            # Getting all the recipes
+            db_name = (name,)
+            cursor.execute('SELECT * FROM Recipes WHERE instr(name, ?) > 0',
+                    db_name)
+            rows = cursor.fetchall()
+            for row in rows:
+                recipes.append(self.row_to_recipe(row, cursor))
+
+        except sqlite3.Error as e:
+            print("Something went wrong")
+            print(e)
+            if connection:
+                connection.rollback()
+            return
+
+        finally:
+            if connection:
+                connection.close()
+
+        return recipes

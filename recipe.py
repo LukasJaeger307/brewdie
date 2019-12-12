@@ -38,6 +38,9 @@ class Recipe:
         self.litres = litres
         self.correction_factor = correction_factor
 
+    def __eq__(self, other):
+        return self.name == other.name
+
     def add_malt(self, name, gramms):
         self.malts[name] = gramms
 
@@ -89,6 +92,7 @@ class Recipe:
             print("    ", hop_dosage.name, ":", round(hop_dosage.gramms *
                 self.correction_factor, 2),
                     "gramms after", hop_dosage.minutes, "minutes")
+        print("----")
 
     def get_shopping_list(self):
         shopping_list = {}
