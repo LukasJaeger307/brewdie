@@ -18,6 +18,7 @@
 import sqlite3
 import sys
 from recipe import *
+from brew import *
 
 class BrewdieDB:
     def __init__(self):
@@ -46,8 +47,8 @@ class BrewdieDB:
                         'datetime timestamp NOT NULL,'
                         'recipe TEXT NOT NULL,'
                         'note TEXT,'
-                        'density_initial REAL,'
-                        'density_final REAL)')
+                        'gravity_initial REAL,'
+                        'gravity_final REAL)')
             connection.commit()
         
         except sqlite3.Error as e:
@@ -105,11 +106,11 @@ class BrewdieDB:
             cursor = connection.cursor()
 
             cursor.execute('INSERT INTO Brews '
-                    '(datetime, recipe, note, density_initial, density_final) '
+                    '(datetime, recipe, note, gravity_initial, gravity_final) '
                     'VALUES(?, ?, ?, ?, ?)',
                     (brew.datetime, brew.recipe.name, brew.note,
-                        brew.density_initial,
-                        brew.density_final))
+                        brew.gravity_initial,
+                        brew.gravity_final))
             connection.commit()
         except sqlite3.Error as e:
             print("Something went wrong")
@@ -143,6 +144,16 @@ class BrewdieDB:
         
         return loaded_recipe
 
+    def row_to_brew(self, row, brew):
+        # Getting the matching recipe
+        recipe = self.load_recipe(row[2])
+        if not recipe:
+            return None
+
+        # Converting a brew database row into a python object
+        loaded_brew = Brew(row[1], recipe, row[3], row[4], row[5])
+        return loaded_brew
+
     def load_recipe(self, name):
         try:
             # Establishing a connection
@@ -156,7 +167,7 @@ class BrewdieDB:
             if (row):    
                 loaded_recipe = self.row_to_recipe (row, cursor)
             else:
-                print("Could not find recipe: " + name)
+                print("Could not find recipe:",  name)
                 loaded_recipe = None
 
         except sqlite3.Error as e:
@@ -223,6 +234,34 @@ class BrewdieDB:
             if connection:
                 connection.close()
         return recipes
+
+    def load_brews_by_recipe_name(self, recipe):
+        brews = []
+        try:
+            # Establishing a connection
+            connection = sqlite3.connect('brewdie.db',
+                    detect_types = 
+                    sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
+            cursor = connection.cursor()
+            
+            db_recipe = (recipe,)
+            cursor.execute('SELECT * FROM Brews WHERE instr(recipe, ?) > 0',
+                    db_recipe)
+            rows = cursor.fetchall()
+            for row in rows:
+                brews.append(self.row_to_brew(row, cursor))
+
+        except sqlite3.Error as e:
+            print("Something went wrong")
+            print(e)
+            if connection:
+                connection.rollback()
+            return
+
+        finally:
+            if connection:
+                connection.close()
+        return brews
 
     def load_recipes_by_style(self, style):
         recipes = []

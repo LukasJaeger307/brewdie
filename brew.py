@@ -19,16 +19,27 @@ import datetime
 from recipe import *
 
 class Brew:
-    def __init__ (self, datetime, recipe, note):
+    def __init__ (self, datetime, recipe, note, gravity_initial = 0.0,
+            gravity_final = 0.0):
         self.datetime = datetime
         self.recipe = recipe
         self.note = note
-        self.density_initial = 0
-        self.density_final = 0
+        self.gravity_initial = gravity_initial
+        self.gravity_final = gravity_final
 
     def get_weight_percentage(self):
-        return (self.density_initial - self.density_final) * 105
+        return (self.gravity_initial - self.gravity_final) * 105
 
     def get_volume_percentage(self):
         return self.get_weight_percentage() * 1.25
+
+    def print(self):
+        print("---- Brew information")
+        print("Time:           ", self.datetime)
+        print("Recipe name:    ", self.recipe.name)
+        print("Note:           ", self.note)
+        print("Initial gravity:", self.gravity_initial)
+        print("Final gravity:  ", self.gravity_final)
+        print("Alcohol content:", round(self.get_volume_percentage(), 2))
+        print("----")
 

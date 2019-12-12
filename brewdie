@@ -107,14 +107,17 @@ for pale_ale in pale_ales:
     pale_ale.print()
 
 # Creating a brew
-brew = Brew(datetime.datetime.now(), recipe, "Gnampf")
-brew.density_initial = 1.050
-brew.density_final = 1.012
-
-print(round(brew.get_volume_percentage(), 2))
+brew = Brew(datetime.datetime.now(), recipe, "Gnampf", 1.050, 1.012)
+brew.print()
 
 # Storing it in the database
 db.store_brew(brew)
+
+# Loading it
+loaded_brews = db.load_brews_by_recipe_name("North Star")
+if loaded_brews:
+    for brew in loaded_brews:
+        brew.print()
 
 # Create a new recipe with user input
 #user_recipe = RecipeMaker().create_recipe()
