@@ -18,32 +18,107 @@
 # along with Brewdie.  If not, see <http://www.gnu.org/licenses/>. 
 
 import datetime
+import argparse
 
 from recipe import *
 from brew import *
 from brewdiedb import *
+from recipe_maker import *
 
 VERSION = "0.1"
 print("Brewdie v" + VERSION)
 
+# Create a database connector
 db = BrewdieDB()
 
-recipe = Recipe("South Star", "Pale Ale", 70)
-recipe.add_malt("Pale Ale Malz", 4700)
-recipe.add_malt("Carapils", 235)
+# Parse the command line arguments
+#parser = argparse.ArgumentParser()
+#parser.add_argument("command", help="A command for the brewdie recipe"
+#        " application")
+#parser.add_argument("--name")
+#parser.add_argument("--style")
+#args = parser.parse_args()
 
-recipe.add_rest("Hauptrast", 65, 60)
+#print(args.command)
+#if args.name:
+#    print("Name:", args.name)
+#if args.style:
+#    print("Style:", args.style)
 
-recipe.add_hop_dosage("Cascade", 41, 0)
-recipe.add_hop_dosage("Cascade", 20, 15)
-recipe.add_hop_dosage("Cascade", 20, 65)
-recipe.add_hop_dosage("Cascade", 63, 70)
+
+# Create a regular Pale Ale
+recipe = Recipe("North Star", "American Pale Ale", 23.0, 70)
+recipe.add_malt("Pale Ale Malt", 4700.0)
+recipe.add_malt("Carapils", 235.0)
+
+recipe.add_rest("Main rest", 65.0, 60)
+
+recipe.add_hop_dosage("Cascade", 41.0, 0)
+recipe.add_hop_dosage("Cascade", 20.0, 15)
+recipe.add_hop_dosage("Cascade", 20.0, 65)
+recipe.add_hop_dosage("Cascade", 63.0, 70)
+
+recipe.print()
 
 db.store_recipe(recipe)
+
+# Create a belgian Pale Ale
+recipe2 = Recipe("Etoile Polaire", "Belgian Pale Ale", 23.0, 70)
+recipe2.add_malt("Pale Ale Malt", 4600.0)
+recipe2.add_malt("Caramünch", 500.0)
+
+recipe2.add_rest("Main rest", 65.0, 60)
+
+recipe2.add_hop_dosage("Golding", 38.0, 0)
+recipe2.add_hop_dosage("Saaz", 13.0, 60)
+recipe2.add_hop_dosage("Saaz", 38.0, 70)
+
+recipe2.print()
+
+db.store_recipe(recipe2)
+
+# Create a Brown Ale
+recipe3 = Recipe("The Parting Glass", "Brown Ale", 23.0, 70)
+recipe3.add_malt("Pale Ale Malt", 3500.0)
+recipe3.add_malt("Caramünch", 300.0)
+recipe3.add_malt("Carafa II", 165.0)
+recipe3.add_malt("Wheat flakes", 55)
+
+recipe3.add_rest("Main rest", 65.0, 60)
+
+recipe3.add_hop_dosage("Fuggle", 24.0, 0)
+recipe3.add_hop_dosage("Fuggle", 24.0, 60)
+
+recipe3.print()
+
+db.store_recipe(recipe3)
+
+loaded_recipe = db.load_recipe("North Star")
+loaded_recipe.print()
+
+scaled_recipe = recipe.scale_to_litres(4.0)
+scaled_recipe.print()
+
+print(scaled_recipe.get_shopping_list())
+
+# Searching for pale ales
+pale_ales = db.load_recipes_by_style("Pale Ale")
+for pale_ale in pale_ales:
+    pale_ale.print()
 
 # Creating a brew
 brew = Brew(datetime.datetime.now(), recipe, "Gnampf")
 brew.density_initial = 1.050
 brew.density_final = 1.012
 
-print(brew.get_volume_percentage())
+print(round(brew.get_volume_percentage(), 2))
+
+# Storing it in the database
+db.store_brew(brew)
+
+# Create a new recipe with user input
+#user_recipe = RecipeMaker().create_recipe()
+#if user_recipe:
+#    user_recipe.print()
+#else:
+#    print ("User recipe was invalid")

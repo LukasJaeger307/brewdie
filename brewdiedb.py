@@ -33,14 +33,21 @@ class BrewdieDB:
 
             # Creating tables if they don't exist
             if not 'Recipes' in table_names:
-                cursor.execute('CREATE TABLE Recipes (name TEXT PRIMARY KEY, type TEXT, boiling_minutes INTEGER)')
+                cursor.execute('CREATE TABLE Recipes (name TEXT PRIMARY KEY, type TEXT, boiling_minutes INTEGER, litres REAL, correction_factor REAL)')
             if not 'Malts' in table_names:
                 cursor.execute('CREATE TABLE Malts (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, gramms REAL, recipe_name TEXT)')
             if not 'Rests' in table_names:
                 cursor.execute('CREATE TABLE Rests (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, degrees REAL, minutes INTEGER, position INTEGER, recipe_name TEXT)')
             if not 'HopDosages' in table_names:
                 cursor.execute('CREATE TABLE HopDosages (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, minutes INTEGER, gramms REAL, recipe_name TEXT)')
-
+            if not 'Brews' in table_names:
+                cursor.execute('CREATE TABLE Brews ('
+                        'id INTEGER PRIMARY KEY AUTOINCREMENT,'
+                        'datetime timestamp NOT NULL,'
+                        'recipe TEXT NOT NULL,'
+                        'note TEXT,'
+                        'density_initial REAL,'
+                        'density_final REAL)')
             connection.commit()
         
         except sqlite3.Error as e:
@@ -66,7 +73,7 @@ class BrewdieDB:
                 print("Recipe is already stored in the database")
             else:
                 # It is not, so we can insert it
-                cursor.execute('INSERT INTO Recipes VALUES(?, ?, ?)', (recipe.name, recipe.style, recipe.boiling_minutes))
+                cursor.execute('INSERT INTO Recipes VALUES(?, ?, ?, ?, ?)', (recipe.name, recipe.style, recipe.boiling_minutes, recipe.litres, recipe.correction_factor))
                 for (malt_name, malt_gramms) in recipe.malts.items():
                     cursor.execute('INSERT INTO Malts(name, gramms, recipe_name) VALUES(?, ?, ?)', (malt_name, malt_gramms, recipe.name))
 
@@ -89,24 +96,52 @@ class BrewdieDB:
             if connection:
                 connection.close()
 
+    def store_brew(self, brew):
+        try:
+            # Establishing a connection
+            connection = sqlite3.connect('brewdie.db',
+                    detect_types = 
+                    sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
+            cursor = connection.cursor()
+
+            cursor.execute('INSERT INTO Brews '
+                    '(datetime, recipe, note, density_initial, density_final) '
+                    'VALUES(?, ?, ?, ?, ?)',
+                    (brew.datetime, brew.recipe.name, brew.note,
+                        brew.density_initial,
+                        brew.density_final))
+            connection.commit()
+        except sqlite3.Error as e:
+            print("Something went wrong")
+            print(e)
+            if connection:
+                connection.rollback()
+            return
+
+        finally:
+            if connection:
+                connection.close()
+
+
     def row_to_recipe(self, row, cursor):
         # Converting a recipe database row into a python object
-        recipe = Recipe(row[0], row[1], row[2])
-        recipe_name = (recipe.name, )
+        loaded_recipe = Recipe(row[0], row[1], row[3], row[2], row[4])
+
+        recipe_name = (loaded_recipe.name, )
 
         # Adding the malts
         for malt_row in cursor.execute('SELECT * FROM Malts WHERE recipe_name=?', recipe_name):
-            recipe.malts[malt_row[1]] = malt_row[2]
+            loaded_recipe.add_malt(malt_row[1], malt_row[2])
 
         # Adding the rests
         for rest_row in cursor.execute('SELECT * FROM Rests WHERE recipe_name=? ORDER BY position ASC', recipe_name):
-            recipe.rests.append(Rest(rest_row[1], rest_row[2], rest_row[3]))
+            loaded_recipe.add_rest(rest_row[1], rest_row[2], rest_row[3])
 
         # Adding the hop dosages
         for hop_dosage_row in cursor.execute('SELECT * FROM HopDosages WHERE recipe_name=?', recipe_name):
-            recipe.hop_dosages.append(HopDosage(hop_dosage_row[1], hop_dosage_row[3], hop_dosage_row[2]))
+            loaded_recipe.add_hop_dosage(hop_dosage_row[1], hop_dosage_row[3], hop_dosage_row[2])
         
-        return recipe
+        return loaded_recipe
 
     def load_recipe(self, name):
         try:
@@ -119,10 +154,10 @@ class BrewdieDB:
             cursor.execute('SELECT * FROM Recipes WHERE name=?', db_name)
             row = cursor.fetchone()
             if (row):    
-                recipe = self.row_to_recipe (row, cursor)
+                loaded_recipe = self.row_to_recipe (row, cursor)
             else:
                 print("Could not find recipe: " + name)
-                recipe = None
+                loaded_recipe = None
 
         except sqlite3.Error as e:
             print("Something went wrong")
@@ -134,8 +169,7 @@ class BrewdieDB:
         finally:
             if connection:
                 connection.close()
-        return recipe
-
+        return loaded_recipe
     
     def delete_recipe(self, name):
         try:
@@ -173,7 +207,9 @@ class BrewdieDB:
             cursor = connection.cursor()
         
             # Getting all the recipes
-            for row in cursor.execute('SELECT * FROM Recipes'):
+            cursor.execute('SELECT * FROM Recipes')
+            rows = cursor.fetchall()
+            for row in rows:
                 recipes.append(self.row_to_recipe(row, cursor))
 
         except sqlite3.Error as e:
@@ -186,4 +222,31 @@ class BrewdieDB:
         finally:
             if connection:
                 connection.close()
+        return recipes
+
+    def load_recipes_by_style(self, style):
+        recipes = []
+        try:
+            # Establishing a connection
+            connection = sqlite3.connect('brewdie.db')
+            cursor = connection.cursor()
+        
+            # Getting all the recipes
+            db_style = (style,)
+            cursor.execute('SELECT * FROM Recipes WHERE instr(type, ?) > 0', db_style)
+            rows = cursor.fetchall()
+            for row in rows:
+                recipes.append(self.row_to_recipe(row, cursor))
+
+        except sqlite3.Error as e:
+            print("Something went wrong")
+            print(e)
+            if connection:
+                connection.rollback()
+            return
+
+        finally:
+            if connection:
+                connection.close()
+
         return recipes
