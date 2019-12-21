@@ -47,8 +47,19 @@ class RecipeMaker:
             except ValueError:
                 print("This was no floating point number. Please try again")
                 is_valid_input = False
+        
+        is_valid_input = False
+        
+        while not is_valid_input:
+            try:
+                sugar_gramms_per_litre = float(input("Enter the gramms of sugar per litre: "))
+                is_valid_input = True
+            except ValueError:
+                print("This was no floating point number. Please try again")
+                is_valid_input = False
 
-        recipe = Recipe(name, style, boiling_minutes, litres)
+        recipe = Recipe(name, style, litres, sugar_gramms_per_litre,
+                boiling_minutes)
 
         # Add the malts
         is_valid_input = True
@@ -84,6 +95,16 @@ class RecipeMaker:
                 is_valid_input = False
             else:
                 recipe.hop_dosages.append(hop_dosage)
+                is_valid_input = True
+
+        # Add the additional ingredients
+        is_valid_input = True
+        while is_valid_input:
+            additional_ingredient = self.create_additional_ingredient()
+            if additional_ingredient is None:
+                is_valid_input = False
+            else:
+                recipe.additional_ingredients.append(additional_ingredient)
                 is_valid_input = True
 
         return recipe
@@ -142,3 +163,22 @@ class RecipeMaker:
                 is_valid_input = False
         
         return HopDosage(name, gramms, minutes)
+
+    def create_additional_ingredient(self):
+        name = input("Enter the name of the additional ingredient you wish to add: ")
+        if not name:
+            return None
+        
+        is_valid_input = False
+        gramms = 0.0
+        while not is_valid_input:
+            try:
+                gramms = float(input("Enter the gramms of that additional ingredient: "))
+                is_valid_input = True
+            except ValueError:
+                print("This was no floating point number. Please try again")
+                is_valid_input = False
+
+        note = input("Enter an optional note for this ingredient: ")
+
+        return AdditionalIngredient(name, gramms, note)

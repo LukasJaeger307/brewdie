@@ -34,7 +34,9 @@ class BrewdieDB:
 
             # Creating tables if they don't exist
             if not 'Recipes' in table_names:
-                cursor.execute('CREATE TABLE Recipes (name TEXT PRIMARY KEY, type TEXT, boiling_minutes INTEGER, litres REAL, correction_factor REAL)')
+                cursor.execute('CREATE TABLE Recipes (name TEXT PRIMARY KEY, '
+                    'type TEXT, boiling_minutes INTEGER, litres REAL, '
+                    'sugar_gramms_per_litre REAL, correction_factor REAL)')
             if not 'Malts' in table_names:
                 cursor.execute('CREATE TABLE Malts (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, gramms REAL, recipe_name TEXT)')
             if not 'Rests' in table_names:
@@ -49,10 +51,19 @@ class BrewdieDB:
                         'note TEXT,'
                         'gravity_initial REAL,'
                         'gravity_final REAL)')
+            if not 'AdditionalIngredients' in table_names:
+                cursor.execute('CREATE TABLE AdditionalIngredients ('
+                        'id INTEGER PRIMARY KEY AUTOINCREMENT, '
+                        'name TEXT NOT NULL,'
+                        'gramms REAL,'
+                        'note TEXT, '
+                        'recipe_name TEXT NOT NULL)')
+
             connection.commit()
         
         except sqlite3.Error as e:
             if connection:
+                print("Something is wrong with the database")
                 connection.rollback()
                 sys.exit(1)
 
@@ -74,7 +85,10 @@ class BrewdieDB:
                 print("Recipe is already stored in the database")
             else:
                 # It is not, so we can insert it
-                cursor.execute('INSERT INTO Recipes VALUES(?, ?, ?, ?, ?)', (recipe.name, recipe.style, recipe.boiling_minutes, recipe.litres, recipe.correction_factor))
+                cursor.execute('INSERT INTO Recipes VALUES(?, ?, ?, ?, ?, ?)', 
+                        (recipe.name, recipe.style, recipe.litres, 
+                            recipe.sugar_gramms_per_litre,
+                            recipe.boiling_minutes, recipe.correction_factor))
                 for (malt_name, malt_gramms) in recipe.malts.items():
                     cursor.execute('INSERT INTO Malts(name, gramms, recipe_name) VALUES(?, ?, ?)', (malt_name, malt_gramms, recipe.name))
 
@@ -85,6 +99,16 @@ class BrewdieDB:
 
                 for hop_dosage in recipe.hop_dosages:
                     cursor.execute('INSERT INTO HopDosages(name, minutes, gramms, recipe_name) VALUES(?, ?, ?, ?)', (hop_dosage.name, hop_dosage.minutes, hop_dosage.gramms, recipe.name))
+
+                for additional_ingredient in recipe.additional_ingredients:
+                    cursor.execute('INSERT INTO AdditionalIngredients(name,'
+                        'gramms, note, recipe_name) '
+                        'VALUES(?, ?, ?, ?)',
+                        (additional_ingredient.name,
+                        additional_ingredient.gramms,
+                        additional_ingredient.note,
+                        recipe.name))
+
             connection.commit()
         except sqlite3.Error as e:
             print("Something went wrong")
@@ -126,7 +150,7 @@ class BrewdieDB:
 
     def row_to_recipe(self, row, cursor):
         # Converting a recipe database row into a python object
-        loaded_recipe = Recipe(row[0], row[1], row[3], row[2], row[4])
+        loaded_recipe = Recipe(row[0], row[1], row[2], row[3], row[4], row[5])
 
         recipe_name = (loaded_recipe.name, )
 
@@ -141,6 +165,11 @@ class BrewdieDB:
         # Adding the hop dosages
         for hop_dosage_row in cursor.execute('SELECT * FROM HopDosages WHERE recipe_name=?', recipe_name):
             loaded_recipe.add_hop_dosage(hop_dosage_row[1], hop_dosage_row[3], hop_dosage_row[2])
+
+        # Adding the additional ingredients
+        for row in cursor.execute('SELECT * FROM AdditionalIngredients WHERE '
+                'recipe_name=?', recipe_name):
+            loaded_recipe.add_additional_ingredient(row[1], row[2], row[3])
         
         return loaded_recipe
 

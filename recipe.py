@@ -27,8 +27,15 @@ class Rest:
         self.degrees = degrees
         self.minutes = minutes
 
+class AdditionalIngredient:
+    def __init__(self, name, gramms, note):
+        self.name = name
+        self.gramms = gramms
+        self.note = note
+
 class Recipe:
-    def __init__(self, name, style, litres, boiling_minutes=60, correction_factor = 1.0):
+    def __init__(self, name, style, litres, sugar_gramms_per_litre,
+            boiling_minutes=60, correction_factor = 1.0):
         self.name = name
         self.style = style
         self.rests = rests = []
@@ -36,7 +43,9 @@ class Recipe:
         self.boiling_minutes = boiling_minutes
         self.hop_dosages = []
         self.litres = litres
+        self.sugar_gramms_per_litre = sugar_gramms_per_litre
         self.correction_factor = correction_factor
+        self.additional_ingredients = []
 
     def __eq__(self, other):
         return self.name == other.name
@@ -52,6 +61,10 @@ class Recipe:
 
     def add_hop_dosage(self, name, gramms, minutes):
         self.hop_dosages.append(HopDosage(name, gramms, minutes))
+
+    def add_additional_ingredient(self, name, gramms, note):
+        self.additional_ingredients.append(AdditionalIngredient(name, gramms,
+            note))
 
     def scale_to_litres(self, scaled_litres):
         scaling_factor = scaled_litres / self.litres
@@ -69,7 +82,16 @@ class Recipe:
             scaled_recipe.add_hop_dosage(hop_dosage.name, hop_dosage.gramms *
                     scaling_factor, hop_dosage.minutes)
 
+        # Scale the additional ingredients
+        for additional_ingredient in self.additional_ingredients:
+            scaled_recipe.add_additional_ingredient(additional_ingredient.name,
+                    additional_ingredient.gramms * scaling_factor,
+                    additional_ingredient.note)
+
         return scaled_recipe
+
+    def get_sugar_for_carbonation(self):
+        return self.litres * self.sugar_gramms_per_litre
 
 
     def print(self):
@@ -78,6 +100,8 @@ class Recipe:
         print("Style:          ", self.style)
         print("Boiling minutes:", round(self.boiling_minutes,2))
         print("Litres:         ", round(self.litres, 2))
+        print("Sugar (g/l)     ", round(self.sugar_gramms_per_litre, 2))
+        print("Sugar (total)   ", round(self.get_sugar_for_carbonation(), 2))
         print("Malts:")
         for malt, weight in self.malts.items():
             print("    ", malt, ":", round(weight * self.correction_factor, 2))
@@ -92,6 +116,15 @@ class Recipe:
             print("    ", hop_dosage.name, ":", round(hop_dosage.gramms *
                 self.correction_factor, 2),
                     "gramms after", hop_dosage.minutes, "minutes")
+
+        if self.additional_ingredients :
+            print("Additional ingredients:")
+            for additional_ingredient in self.additional_ingredients:
+                print("    ", additional_ingredient.name, ":",
+                        round(additional_ingredient.gramms *
+                            self.correction_factor, 2), "gramms")
+                print("        ", additional_ingredient.note)
+
         print("----")
 
     def get_shopping_list(self):
@@ -110,5 +143,14 @@ class Recipe:
                 shopping_list[hop_dosage.name] += hop_dosage.gramms
             else:
                 shopping_list[hop_dosage.name] = hop_dosage.gramms
+
+        # Add additional ingredients
+        for additional_ingredients in self.additional_ingredients:
+            if additional_ingredient.name in shopping_list:
+                shopping_list[additional_ingredient.name] += \
+                additional_ingredient.gramms
+            else:
+                shopping_list[additional_ingredient.name] = \
+                additional_ingredient.gramms
 
         return shopping_list

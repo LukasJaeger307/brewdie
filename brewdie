@@ -31,6 +31,7 @@ VERSION = "0.1"
 db = BrewdieDB()
 
 # Parse the command line arguments
+print("YOMAMA!")
 parser = argparse.ArgumentParser()
 parser.add_argument("command", help="A command for the brewdie recipe"
         " application")
