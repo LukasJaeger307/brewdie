@@ -69,7 +69,8 @@ class Recipe:
     def scale_to_litres(self, scaled_litres):
         scaling_factor = scaled_litres / self.litres
         scaled_recipe = Recipe(self.name, self.style, scaled_litres,
-                self.boiling_minutes, self.correction_factor)
+                self.sugar_gramms_per_litre, self.boiling_minutes, 
+                self.correction_factor)
         
         # Scale the malts
         for malt, weight in self.malts.items():
