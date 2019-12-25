@@ -25,6 +25,9 @@ from brew import *
 from brewdiedb import *
 from recipe_maker import *
 
+from shopping_list import *
+from shopping_list_maker import *
+
 VERSION = "0.1"
 
 # Create a database connector
@@ -112,3 +115,7 @@ elif args.command == "load":
                 recipe = recipe.scale_to_litres(args.litres)
             recipe.print()
 
+elif args.command == "shop":
+    shoppingListMaker = ShoppingListMaker(db)
+    shoppingList = shoppingListMaker.create_shopping_list()
+    shoppingList.print()
