@@ -119,3 +119,5 @@ elif args.command == "shop":
     shoppingListMaker = ShoppingListMaker(db)
     shoppingList = shoppingListMaker.create_shopping_list()
     shoppingList.print()
+else:
+    print("Command not found")

@@ -113,10 +113,13 @@ class Recipe:
         print("Sugar (g/l)     ", round(self.sugar_gramms_per_litre, 2))
         print("Sugar (total)   ", round(self.get_sugar_for_carbonation(), 2))
         print("Malts:")
+        maltweight = 0.0
         for malt, weight in self.malts.items():
+            maltweight += weight
             print("    " + malt + " : " + str(round(weight * self.correction_factor, 2)) +
                     " (" + str(round(self.get_percentage_of_malt(malt), 2)) + "%)")
 
+        print("    Total malt weight: " + str(round(maltweight,2)))
         print("Rests:")
         for rest in self.rests:
             print("    ", rest.name, ":", rest.degrees, "°C for", rest.minutes,
