@@ -16,6 +16,7 @@
 # along with Brewdie.  If not, see <http://www.gnu.org/licenses/>.
 
 class HopDosage:
+    # TODO: Test
     def __init__(self, name, gramms, minutes, id=0):
         self.name = name
         self.gramms = gramms
@@ -23,6 +24,7 @@ class HopDosage:
         self.id = id
 
 class Rest:
+    # TODO: Test
     def __init__(self, name, degrees, minutes, id=0):
         self.name = name
         self.degrees = degrees
@@ -30,6 +32,7 @@ class Rest:
         self.id = id
 
 class AdditionalIngredient:
+    # TODO: Test
     def __init__(self, name, gramms, note, id=0):
         self.name = name
         self.gramms = gramms
@@ -37,6 +40,7 @@ class AdditionalIngredient:
         self.id = id
 
 class Recipe:
+    # TODO: Test
     def __init__(self, name, style, litres, sugar_gramms_per_litre,
             boiling_minutes=60, correction_factor = 1.0):
         self.name = name
@@ -50,25 +54,32 @@ class Recipe:
         self.correction_factor = correction_factor
         self.additional_ingredients = []
 
+    # TODO: Test
     def __eq__(self, other):
         return self.name == other.name
 
+    # TODO: Test
     def add_malt(self, name, gramms):
         self.malts[name] = gramms
 
+    # TODO: Test
     def remove_malt(self, name):
         del(self.malts[name])
 
+    # TODO: Test
     def add_rest(self, name, degrees, minutes):
         self.rests.append(Rest(name, degrees, minutes))
 
+    # TODO: Test
     def add_hop_dosage(self, name, gramms, minutes):
         self.hop_dosages.append(HopDosage(name, gramms, minutes))
 
+    # TODO: Test
     def add_additional_ingredient(self, name, gramms, note):
         self.additional_ingredients.append(AdditionalIngredient(name, gramms,
             note))
 
+    # TODO: Test
     def scale_to_litres(self, scaled_litres):
         scaling_factor = scaled_litres / self.litres
         scaled_recipe = Recipe(self.name, self.style, scaled_litres,
@@ -94,9 +105,11 @@ class Recipe:
 
         return scaled_recipe
 
+    # TODO: Test
     def get_sugar_for_carbonation(self):
         return self.litres * self.sugar_gramms_per_litre
 
+    # TODO: Test
     def get_percentage_of_malt(self, malt_name):
         if not malt_name in self.malts:
             return 0.0
@@ -107,6 +120,7 @@ class Recipe:
             total_weight += weight
         return 100.0 * self.malts[malt_name] / total_weight
         
+    # TODO: Test
     def print(self):
         print("---- Recipe information")
         print("Name:           ", self.name)
@@ -144,6 +158,7 @@ class Recipe:
 
         print("----")
 
+    # TODO: Test
     def get_shopping_list(self):
         shopping_list = {}
 
