@@ -16,19 +16,19 @@
 # along with Brewdie.  If not, see <http://www.gnu.org/licenses/>.
 
 class HopDosage:
-    def __init__(self, name, gramms, minutes):
+    def __init__(self, id=0, name, gramms, minutes):
         self.name = name
         self.gramms = gramms
         self.minutes = minutes
 
 class Rest:
-    def __init__(self, name, degrees, minutes):
+    def __init__(self, id=0, name, degrees, minutes):
         self.name = name
         self.degrees = degrees
         self.minutes = minutes
 
 class AdditionalIngredient:
-    def __init__(self, name, gramms, note):
+    def __init__(self, id=0, name, gramms, note):
         self.name = name
         self.gramms = gramms
         self.note = note
