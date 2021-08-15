@@ -16,22 +16,25 @@
 # along with Brewdie.  If not, see <http://www.gnu.org/licenses/>.
 
 class HopDosage:
-    def __init__(self, id=0, name, gramms, minutes):
+    def __init__(self, name, gramms, minutes, id=0):
         self.name = name
         self.gramms = gramms
         self.minutes = minutes
+        self.id = id
 
 class Rest:
-    def __init__(self, id=0, name, degrees, minutes):
+    def __init__(self, name, degrees, minutes, id=0):
         self.name = name
         self.degrees = degrees
         self.minutes = minutes
+        self.id = id
 
 class AdditionalIngredient:
-    def __init__(self, id=0, name, gramms, note):
+    def __init__(self, name, gramms, note, id=0):
         self.name = name
         self.gramms = gramms
         self.note = note
+        self.id = id
 
 class Recipe:
     def __init__(self, name, style, litres, sugar_gramms_per_litre,
