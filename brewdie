@@ -25,19 +25,25 @@ from brew import *
 from brewdiedb import *
 from recipe_maker import *
 
+from shopping_list import *
+from shopping_list_maker import *
+
 VERSION = "0.1"
 
 # Create a database connector
 db = BrewdieDB()
 
 # Parse the command line arguments
-print("YOMAMA!")
 parser = argparse.ArgumentParser()
 parser.add_argument("command", help="A command for the brewdie recipe"
         " application")
 parser.add_argument("--name")
 parser.add_argument("--style")
+parser.add_argument("--litres", type=float)
 args = parser.parse_args()
+
+if args.litres:
+    print(args.litres)
 
 # Checking which command was entered
 if args.command == "new":
@@ -94,6 +100,8 @@ elif args.command == "list":
 
         # Printing the results
         for recipe in found_recipes:
+            if args.litres:
+                recipe = recipe.scale_to_litres(args.litres)
             recipe.print()
 
 elif args.command == "load":
@@ -103,5 +111,13 @@ elif args.command == "load":
     else:
         recipe = db.load_recipe(args.name)
         if recipe:
+            if args.litres:
+                recipe = recipe.scale_to_litres(args.litres)
             recipe.print()
 
+elif args.command == "shop":
+    shoppingListMaker = ShoppingListMaker(db)
+    shoppingList = shoppingListMaker.create_shopping_list()
+    shoppingList.print()
+else:
+    print("Command not found")

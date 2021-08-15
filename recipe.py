@@ -69,7 +69,8 @@ class Recipe:
     def scale_to_litres(self, scaled_litres):
         scaling_factor = scaled_litres / self.litres
         scaled_recipe = Recipe(self.name, self.style, scaled_litres,
-                self.boiling_minutes, self.correction_factor)
+                self.sugar_gramms_per_litre, self.boiling_minutes, 
+                self.correction_factor)
         
         # Scale the malts
         for malt, weight in self.malts.items():
@@ -93,7 +94,16 @@ class Recipe:
     def get_sugar_for_carbonation(self):
         return self.litres * self.sugar_gramms_per_litre
 
+    def get_percentage_of_malt(self, malt_name):
+        if not malt_name in self.malts:
+            return 0.0
 
+        # Compute the total weight of the malts
+        total_weight = 0.0
+        for malt, weight in self.malts.items():
+            total_weight += weight
+        return 100.0 * self.malts[malt_name] / total_weight
+        
     def print(self):
         print("---- Recipe information")
         print("Name:           ", self.name)
@@ -103,9 +113,13 @@ class Recipe:
         print("Sugar (g/l)     ", round(self.sugar_gramms_per_litre, 2))
         print("Sugar (total)   ", round(self.get_sugar_for_carbonation(), 2))
         print("Malts:")
+        maltweight = 0.0
         for malt, weight in self.malts.items():
-            print("    ", malt, ":", round(weight * self.correction_factor, 2))
+            maltweight += weight
+            print("    " + malt + " : " + str(round(weight * self.correction_factor, 2)) +
+                    " (" + str(round(self.get_percentage_of_malt(malt), 2)) + "%)")
 
+        print("    Total malt weight: " + str(round(maltweight,2)))
         print("Rests:")
         for rest in self.rests:
             print("    ", rest.name, ":", rest.degrees, "°C for", rest.minutes,

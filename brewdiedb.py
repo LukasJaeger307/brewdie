@@ -35,8 +35,8 @@ class BrewdieDB:
             # Creating tables if they don't exist
             if not 'Recipes' in table_names:
                 cursor.execute('CREATE TABLE Recipes (name TEXT PRIMARY KEY, '
-                    'type TEXT, boiling_minutes INTEGER, litres REAL, '
-                    'sugar_gramms_per_litre REAL, correction_factor REAL)')
+                    'style TEXT, litres REAL, sugar_gramms_per_litre REAL,'
+                    'boiling_minutes INTEGER, correction_factor REAL)')
             if not 'Malts' in table_names:
                 cursor.execute('CREATE TABLE Malts (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, gramms REAL, recipe_name TEXT)')
             if not 'Rests' in table_names:
@@ -301,7 +301,7 @@ class BrewdieDB:
         
             # Getting all the recipes
             db_style = (style,)
-            cursor.execute('SELECT * FROM Recipes WHERE instr(type, ?) > 0', db_style)
+            cursor.execute('SELECT * FROM Recipes WHERE instr(style, ?) > 0', db_style)
             rows = cursor.fetchall()
             for row in rows:
                 recipes.append(self.row_to_recipe(row, cursor))
