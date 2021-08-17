@@ -62,6 +62,14 @@ class TestSum(unittest.TestCase):
         result = result and self.check_hop_dosage(hop_dosages[3], "Cascade", 9.00, 90)
         return result
 
+    def check_additional_ingredient(self, additional_ingredient, name, gramms, note):
+        return (additional_ingredient.name == name) and (additional_ingredient.gramms == gramms) and (additional_ingredient.note == note)
+
+    def check_setup_additional_ingredients(self, additional_ingredients):
+        result = len(additional_ingredients) == 1
+        result = result and self.check_additional_ingredient(additional_ingredients[0], "Fairy dust", 5.00, "Add at flame-out")
+        return result
+
     def is_setup_recipe(self, recipe):
         result = self.is_example_recipe(recipe)
         result = result and (len(recipe.rests) == 1)
@@ -72,7 +80,7 @@ class TestSum(unittest.TestCase):
             result = result and (main_rest.minutes == 60)
         result = result and self.check_setup_malts(recipe.get_malts())
         result = result and self.check_setup_hop_dosages(recipe.get_hop_dosages())
-        #result = result and (len(recipe.additional_ingredients) == 1)
+        result = result and self.check_setup_additional_ingredients(recipe.additional_ingredients)
         
         return result
 

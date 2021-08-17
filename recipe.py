@@ -16,7 +16,6 @@
 # along with Brewdie.  If not, see <http://www.gnu.org/licenses/>.
 
 class HopDosage:
-    # TODO: Test
     def __init__(self, name, gramms, minutes, id=0):
         self.name = name
         self.gramms = gramms
@@ -24,7 +23,6 @@ class HopDosage:
         self.id = id
 
 class Rest:
-    # TODO: Test
     def __init__(self, name, degrees, minutes, id=0):
         self.name = name
         self.degrees = degrees
@@ -32,7 +30,6 @@ class Rest:
         self.id = id
 
 class AdditionalIngredient:
-    # TODO: Test
     def __init__(self, name, gramms, note, id=0):
         self.name = name
         self.gramms = gramms
@@ -73,10 +70,8 @@ class Recipe:
     def add_hop_dosage(self, name, gramms, minutes):
         self.hop_dosages.append(HopDosage(name, gramms, minutes))
 
-    # TODO: Test
     def add_additional_ingredient(self, name, gramms, note):
-        #self.additional_ingredients.append(AdditionalIngredient(name, gramms, note))
-        return
+        self.additional_ingredients.append(AdditionalIngredient(name, gramms, note))
 
     def get_hop_dosages(self):
         return self.hop_dosages
