@@ -40,7 +40,6 @@ class AdditionalIngredient:
         self.id = id
 
 class Recipe:
-    # TODO: Test
     def __init__(self, name, style, litres, sugar_gramms_per_litre,
             boiling_minutes=60, correction_factor = 1.0):
         self.name = name
@@ -58,7 +57,6 @@ class Recipe:
     def __eq__(self, other):
         return self.name == other.name
 
-    # TODO: Test
     def add_malt(self, name, gramms):
         self.malts[name] = gramms
 
@@ -66,18 +64,19 @@ class Recipe:
     def remove_malt(self, name):
         del(self.malts[name])
 
-    # TODO: Test
     def add_rest(self, name, degrees, minutes):
         self.rests.append(Rest(name, degrees, minutes))
 
-    # TODO: Test
     def add_hop_dosage(self, name, gramms, minutes):
         self.hop_dosages.append(HopDosage(name, gramms, minutes))
 
     # TODO: Test
     def add_additional_ingredient(self, name, gramms, note):
-        self.additional_ingredients.append(AdditionalIngredient(name, gramms,
-            note))
+        #self.additional_ingredients.append(AdditionalIngredient(name, gramms, note))
+        return
+
+    def get_hop_dosages(self):
+        return self.hop_dosages
 
     # TODO: Test
     def scale_to_litres(self, scaled_litres):
