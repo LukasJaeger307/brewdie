@@ -44,6 +44,13 @@ class TestSum(unittest.TestCase):
         recipe = self.create_example_recipe()
         self.assertTrue(self.is_initialized_example_recipe(recipe))
 
+    def check_setup_malts(self, malts):
+        result = (len(malts) == 2)
+        result = result and (malts["Pale Malt"] == 961.00)
+        result = result and (malts["Carapils"] == 48.00)
+        return result
+
+
     def check_hop_dosage(self, hop_dosage, name, gramms, minutes):
         return (hop_dosage.name == name) and (hop_dosage.gramms == gramms) and (hop_dosage.minutes == minutes)
 
@@ -63,11 +70,8 @@ class TestSum(unittest.TestCase):
             result = result and (main_rest.name == "Main rest")
             result = result and (main_rest.degrees == 67.0)
             result = result and (main_rest.minutes == 60)
-        result = result and (len(recipe.malts) == 2)
-        if (result):
-            result = result and (recipe.malts["Pale Malt"] == 961.00)
-            result = result and (recipe.malts["Carapils"] == 48.00)
-        result = self.check_setup_hop_dosages(recipe.get_hop_dosages())
+        result = result and self.check_setup_malts(recipe.get_malts())
+        result = result and self.check_setup_hop_dosages(recipe.get_hop_dosages())
         #result = result and (len(recipe.additional_ingredients) == 1)
         
         return result

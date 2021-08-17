@@ -64,6 +64,9 @@ class Recipe:
     def remove_malt(self, name):
         del(self.malts[name])
 
+    def get_malts(self):
+        return self.malts
+
     def add_rest(self, name, degrees, minutes):
         self.rests.append(Rest(name, degrees, minutes))
 
